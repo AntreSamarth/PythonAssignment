@@ -1,58 +1,45 @@
 import psutil
 import logging
+import os
 
+def ConfigureLogger(DirectoryName):
+    LogFile = os.path.join(DirectoryName, "ProcessLog.txt")
 
-def ConfigureLogger():
     logging.basicConfig(
-        filename="ProcessLog.txt",
+        filename=LogFile,
         level=logging.INFO,
         format="%(asctime)s : %(levelname)s : %(message)s"
     )
 
+def ValidateDirectory(DirectoryName):
+    if os.path.exists(DirectoryName) == False:
+        return False
 
-def ValidateArguments():
-    if len(__import__("sys").argv) != 2:
-        logging.error("Invalid number of arguments.")
-        logging.info("Usage : python main.py ProcessName")
+    if os.path.isdir(DirectoryName) == False:
         return False
 
     return True
 
-
-def GetProcessInformation(ProcessName):
+def GetProcessInformation():
     try:
-        Found = False
-
-        logging.info(f"Searching for process : {ProcessName}")
+        logging.info("Running Process Information")
 
         for process in psutil.process_iter(['pid', 'name', 'username']):
             try:
                 info = process.info
 
-                if info['name'] is not None:
-                    Name = info['name'].split(".")[0]
-
-                    if Name.lower() == ProcessName.lower():
-                        Found = True
-
-                        logging.info(
-                            f"Name : {info['name']} | "
-                            f"PID : {info['pid']} | "
-                            f"User : {info['username']}"
-                        )
-
-                # If you want exact name including extension,
-                # use this instead:
-                #
-                # if info['name'].lower() == ProcessName.lower():
+                logging.info(
+                    f"Name : {info['name']} | "
+                    f"PID : {info['pid']} | "
+                    f"User : {info['username']}"
+                )
 
             except (psutil.NoSuchProcess,
                     psutil.AccessDenied,
                     psutil.ZombieProcess):
                 continue
 
-        if Found == False:
-            logging.info(f"{ProcessName} process is not running.")
+        logging.info("Process information collected successfully.")
 
     except Exception as e:
         logging.error(f"Error : {e}")
