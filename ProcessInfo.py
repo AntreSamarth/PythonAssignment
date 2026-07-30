@@ -2,27 +2,32 @@ import psutil
 import logging
 import os
 
+
 def ConfigureLogger(DirectoryName):
     LogFile = os.path.join(DirectoryName, "ProcessLog.txt")
 
     logging.basicConfig(
         filename=LogFile,
         level=logging.INFO,
-        format="%(asctime)s : %(levelname)s : %(message)s"
+        format="%(asctime)s : %(levelname)s : %(message)s",
+        force=True
     )
 
+    return LogFile
+
+
 def ValidateDirectory(DirectoryName):
-    if os.path.exists(DirectoryName) == False:
+    if os.path.isdir(DirectoryName):
+        return True
+    else:
+        logging.error("Directory does not exist.")
         return False
 
-    if os.path.isdir(DirectoryName) == False:
-        return False
-
-    return True
 
 def GetProcessInformation():
     try:
         logging.info("Running Process Information")
+        logging.info("-" * 60)
 
         for process in psutil.process_iter(['pid', 'name', 'username']):
             try:
@@ -39,6 +44,7 @@ def GetProcessInformation():
                     psutil.ZombieProcess):
                 continue
 
+        logging.info("-" * 60)
         logging.info("Process information collected successfully.")
 
     except Exception as e:
